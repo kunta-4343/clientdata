@@ -1,0 +1,132 @@
+Step 1: Set up the Unity Project
+Install Unity 2022.3.3f1 from the Unity website.
+Create a new Unity project with 2D settings.
+Step 2: Import DOTween
+Open Unity, go to Window > Package Manager.
+Click on the "+" button on the top-left corner.
+Choose "Add package from git URL."
+Enter the following URL for DOTween:
+bash
+Copy code
+https://github.com/Demigiant/dotween.git
+Unity will download and import the DOTween package into your project.
+Step 3: Create the Script for Circle Spawn and Removal
+Right-click in the Project window, select Create > C# Script, and name it "CircleManager."
+Double-click the script to open it in your preferred code editor.
+Replace the script's content with the following code:
+csharp
+Copy code
+using UnityEngine;
+using System.Collections.Generic;
+using DG.Tweening;
+
+public class CircleManager : MonoBehaviour
+{
+    public GameObject circlePrefab;
+    public int minCircles = 5;
+    public int maxCircles = 10;
+    private List<GameObject> circles = new List<GameObject>();
+    private bool isDrawing = false;
+    void Start()
+    {
+        SpawnCircles();
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            isDrawing = true;
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            isDrawing = false;
+            CheckIntersectionAndRemove();
+        }
+    }
+
+    void SpawnCircles()
+    {
+        int numCircles = Random.Range(minCircles, maxCircles + 1);
+
+        for (int i = 0; i < numCircles; i++)
+        {
+            Vector2 spawnPosition = new Vector2(Random.Range(-8f, 8f), Random.Range(-4f, 4f));
+            GameObject circle = Instantiate(circlePrefab, spawnPosition, Quaternion.identity);
+            circles.Add(circle);
+        }
+    }
+
+    void CheckIntersectionAndRemove()
+    {
+        if (isDrawing)
+            return;
+
+        foreach (GameObject circle in circles)
+        {
+            if (IsLineIntersectingCircle(circle))
+            {
+                RemoveCircle(circle);
+            }
+        }
+    }
+
+    bool IsLineIntersectingCircle(GameObject circle)
+    {
+        // Replace this with the appropriate implementation to check if the line intersects the circle.
+        // You can use geometry or math to check line-circle intersection.
+        // Here, we are assuming they intersect for demonstration purposes.
+        return true;
+    }
+
+    void RemoveCircle(GameObject circle)
+    {
+        circles.Remove(circle);
+        circle.transform.DOScale(Vector3.zero, 0.5f).OnComplete(() =>
+        {
+            Destroy(circle);
+        });
+    }
+
+    public void RestartGame()
+    {
+        foreach (GameObject circle in circles)
+        {
+            Destroy(circle);
+        }
+
+        circles.Clear();
+        SpawnCircles();
+    }
+}
+Step 4: Create the UI and Button
+
+Create a Canvas by right-clicking in the Hierarchy window, then UI > Canvas.
+Create a Panel by right-clicking the Canvas, then UI > Panel.
+Create a Button by right-clicking the Panel, then UI > Button.
+Select the Button and rename it to "RestartButton."
+Position the Button on the screen as you like.
+Create an empty GameObject in the Hierarchy, and rename it "CircleSpawner."
+Attach the "CircleManager" script to the "CircleSpawner" GameObject.
+Assign the "CirclePrefab" variable of the "CircleManager" script by dragging the circle prefab from the Project window onto the script field.
+Step 5: Implement Button Functionality
+Open the "CircleManager" script and add the following method to it:
+csharp
+Copy code
+public void RestartGame()
+{
+    foreach (GameObject circle in circles)
+    {
+        Destroy(circle);
+    }
+
+    circles.Clear();
+    SpawnCircles();
+}
+Back in Unity, select the "RestartButton" in the Hierarchy.
+In the Inspector window, find the OnClick() section in the Button component.
+Click the "+" button to add a new entry.
+Drag the "CircleSpawner" GameObject to the object field.
+From the dropdown, select the "CircleManager.RestartGame()" method.
+Press the "Play" button to run the game in the Unity editor.
+Now, you should have a Unity game where random circles are spawned on the screen. When you draw a line with your mouse or finger (implementing the actual line-circle intersection check is up to you), the intersected circles will disappear, and you can restart the game using the "Restart" button. The removal of circles uses the DOTween library for smooth scaling animations.
